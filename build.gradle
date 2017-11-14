@@ -29,8 +29,13 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-security')
-    compile("org.springframework.boot:spring-boot-devtools")
-    testCompile('org.springframework.boot:spring-boot-starter-test')
+	compile ('org.springframework.boot:spring-boot-starter-log4j2')
+        compile("org.springframework.boot:spring-boot-devtools")
+	testCompile('org.springframework.boot:spring-boot-starter-test')	
+
+}
+configurations {
+	all*.exclude module : 'spring-boot-starter-logging'
 }
 
 jacocoTestCoverageVerification {
