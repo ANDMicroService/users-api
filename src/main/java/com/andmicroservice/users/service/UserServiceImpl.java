@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO createUser(UserDTO userDTO) {
-        logger.info("Creating user: {}", userDTO.toString());
+        logger.info("Creating user: {}", userDTO);
 
         if (userRepository.findOneByLogin(userDTO.getLogin()).isPresent()) {
             throw new IllegalArgumentException("Login already in use");
