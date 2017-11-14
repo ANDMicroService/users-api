@@ -31,6 +31,17 @@ Jacoco is being used to ensure minimum code coverage.
 Reports can be found at:
 ./build/reports
 
+## Linting
+
+Install the SonarLint plugin on Intellij and connect to the SonarCloud instance.
+
+OR
+
+```
+./gradlew sonarqube
+```
+And check results at: https://sonarcloud.io/dashboard?id=com.andmicroservice%3Askeleton-api
+
 ## Actuator endpoints
 
 See https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html
