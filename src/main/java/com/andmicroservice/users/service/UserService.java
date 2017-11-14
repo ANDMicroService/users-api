@@ -1,8 +1,12 @@
 package com.andmicroservice.users.service;
 
-import com.andmicroservice.users.representation.User;
+import com.andmicroservice.users.representation.UserDTO;
+
+import java.util.List;
 
 public interface UserService {
 
-    User getAllUsers();
+    List<UserDTO> getAllUsers();
+
+    UserDTO createUser(UserDTO userDTO);
 }

@@ -8,10 +8,16 @@
 ./gradlew clean build
 ```
 
-### Run
+### Run Application only
 
 ```bash
 ./gradlew bootRun
+```
+
+### Run Application and DB
+
+```bash
+docker-compose up --build
 ```
 
 ### Intellij hot reload
@@ -45,3 +51,4 @@ And check results at: https://sonarcloud.io/dashboard?id=com.andmicroservice%3As
 ## Actuator endpoints
 
 See https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html
+
