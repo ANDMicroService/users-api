@@ -12,4 +12,6 @@ public interface UserService {
     List<UserDTO> getAllUsers();
 
     UserDTO createUser(UserDTO userDTO) throws EmailExistsException, LoginExistsException, IdProvidedException;
+
+    void deleteUser(String login);
 }

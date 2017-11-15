@@ -1,6 +1,7 @@
 package com.andmicroservice.users.resource;
 
 
+import com.andmicroservice.users.config.Constants;
 import com.andmicroservice.users.exception.EmailExistsException;
 import com.andmicroservice.users.exception.IdProvidedException;
 import com.andmicroservice.users.exception.LoginExistsException;
@@ -11,12 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -66,5 +62,20 @@ public class UserResource {
 
 
         return null;
+    }
+
+    /**
+     * DELETE /users/:login : delete the "login" User.
+     *
+     * @param login the login of the user to delete
+     * @return the ResponseEntity with status 200 (OK)
+     */
+    @DeleteMapping("/users/{login:" + Constants.LOGIN_REGEX + "}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String login) {
+        logger.debug("REST request to delete User: {}", login);
+        userService.deleteUser(login);
+        return ResponseEntity.ok()
+                .headers(HeaderUtil.createAlert( "A user is deleted with identifier " + login, login))
+                .build();
     }
 }

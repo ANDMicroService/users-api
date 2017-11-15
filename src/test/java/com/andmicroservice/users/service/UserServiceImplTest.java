@@ -1,5 +1,6 @@
 package com.andmicroservice.users.service;
 
+import com.andmicroservice.users.domain.User;
 import com.andmicroservice.users.repository.UserRepository;
 import com.andmicroservice.users.representation.UserDTO;
 import com.andmicroservice.users.representation.mapper.UserMapper;
@@ -9,11 +10,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -45,7 +48,7 @@ public class UserServiceImplTest {
 
     @Test
     public void getAllUsers_whenSingleUser_returnsListWithUserRepresentation() {
-        com.andmicroservice.users.domain.User domainUser = UserDomainUtils.aTestUser();
+        User domainUser = UserDomainUtils.aTestUser();
         UserDTO expectedUserDTO = UserDTOUtils.aTestUser();
         when(userRepository.findAll()).thenReturn(Collections.singletonList(domainUser));
         when(userMapper.map(any(com.andmicroservice.users.domain.User.class))).thenReturn(expectedUserDTO);
@@ -59,8 +62,8 @@ public class UserServiceImplTest {
 
     @Test
     public void getAllUsers_whenMultipleUsers_returnsListWithUsersRepresentation() {
-        com.andmicroservice.users.domain.User domainUser1 = UserDomainUtils.aTestUser();
-        com.andmicroservice.users.domain.User domainUser2 = UserDomainUtils.aSecondTestUser();
+        User domainUser1 = UserDomainUtils.aTestUser();
+        User domainUser2 = UserDomainUtils.aSecondTestUser();
         UserDTO expectedUserDTO1 = UserDTOUtils.aTestUser();
         UserDTO expectedUserDTO2 = UserDTOUtils.aSecondTestUser();
         when(userRepository.findAll()).thenReturn(Arrays.asList(domainUser1, domainUser2));
@@ -73,6 +76,31 @@ public class UserServiceImplTest {
         verify(userRepository).findAll();
         verify(userMapper).map(eq(domainUser1));
         verify(userMapper).map(eq(domainUser2));
+    }
+
+    @Test
+    public void deleteUser_whenPresent_findsAndDeletesAUser() {
+        User domainUser1 = UserDomainUtils.aTestUser();
+        String login1 = domainUser1.getLogin();
+        Optional<User> domainUserMonad1 = Optional.of(UserDomainUtils.aTestUser());
+        when(userRepository.findOneByLogin(login1)).thenReturn(domainUserMonad1);
+
+        userService.deleteUser(login1);
+        verify(userRepository).findOneByLogin(login1);
+        verify(userRepository).delete(domainUser1);
+    }
+
+    @Test
+    public void deleteUser_whenNotPresent_doesNotDeleteAUser() {
+        User domainUser1 = UserDomainUtils.aTestUser();
+        String login1 = domainUser1.getLogin();
+        Optional<User> domainUserMonadEmpty = Optional.empty();
+        when(userRepository.findOneByLogin(login1)).thenReturn(domainUserMonadEmpty);
+
+        userService.deleteUser(login1);
+        verify(userRepository).findOneByLogin(login1);
+        verify(userRepository, Mockito.times(0)).delete(login1);
+
 
     }
 

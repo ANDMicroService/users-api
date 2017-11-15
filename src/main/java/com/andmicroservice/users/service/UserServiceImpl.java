@@ -58,4 +58,12 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.map(user);
     }
+
+    @Override
+    public void deleteUser(String login) {
+        userRepository.findOneByLogin(login).ifPresent(user -> {
+            userRepository.delete(user);
+            logger.debug("Deleted User: {}", user);
+        });
+    }
 }
