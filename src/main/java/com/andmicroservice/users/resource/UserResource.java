@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 @RestController
@@ -40,20 +42,22 @@ public class UserResource {
 
     @PostMapping("/users")
     @ResponseBody
-    public UserDTO createUser(@Valid @RequestBody UserDTO userDTO) {
-        logger.info("REST request to create UserDTO : {}", userDTO.toString());
+    public ResponseEntity createUser(@Valid @RequestBody UserDTO userDTO) throws URISyntaxException {
+        logger.debug("REST request to create UserDTO : {}", userDTO.toString());
 
         UserDTO createdUser = null;
         try {
             createdUser = userService.createUser(userDTO);
         } catch (EmailExistsException | LoginExistsException | IdProvidedException e) {
-            ResponseEntity.badRequest()
+            return ResponseEntity.badRequest()
                     .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, e.getMessage()))
                     .body(null);
         }
 
-        logger.info("Created user: {}", createdUser.toString());
-        return createdUser;
+        logger.debug("Created user: {}", createdUser.toString());
+        return ResponseEntity.created(new URI("/users/" + createdUser.getLogin()))
+                .headers(HeaderUtil.createAlert( "A user is created with identifier " + createdUser.getLogin(), createdUser.getLogin()))
+                .body(createdUser);
     }
 
     @PutMapping("/users")

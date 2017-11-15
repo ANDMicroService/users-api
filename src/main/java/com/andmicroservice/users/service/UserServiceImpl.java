@@ -42,9 +42,9 @@ public class UserServiceImpl implements UserService {
         if(userDTO.getId() != null) {
             throw new IdProvidedException();
         } else if (userRepository.findOneByLogin(userDTO.getLogin()).isPresent()) {
-            throw new EmailExistsException();
-        } else if (userRepository.findOneByEmail(userDTO.getEmail()).isPresent()) {
             throw new LoginExistsException();
+        } else if (userRepository.findOneByEmail(userDTO.getEmail()).isPresent()) {
+            throw new EmailExistsException();
         }
 
         User user = new User();
