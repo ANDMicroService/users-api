@@ -1,6 +1,9 @@
 package com.andmicroservice.users.resource;
 
 
+import com.andmicroservice.users.exception.EmailExistsException;
+import com.andmicroservice.users.exception.IdProvidedException;
+import com.andmicroservice.users.exception.LoginExistsException;
 import com.andmicroservice.users.representation.UserDTO;
 import com.andmicroservice.users.resource.util.HeaderUtil;
 import com.andmicroservice.users.service.UserService;
@@ -40,12 +43,14 @@ public class UserResource {
     public UserDTO createUser(@Valid @RequestBody UserDTO userDTO) {
         logger.info("REST request to create UserDTO : {}", userDTO.toString());
 
-        if(userDTO.getId() != null) {
+        UserDTO createdUser = null;
+        try {
+            createdUser = userService.createUser(userDTO);
+        } catch (EmailExistsException | LoginExistsException | IdProvidedException e) {
             ResponseEntity.badRequest()
-                    .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, "idexists", "A new user cannot already have an ID"))
+                    .headers(HeaderUtil.createFailureAlert(ENTITY_NAME, e.getMessage()))
                     .body(null);
         }
-        UserDTO createdUser = userService.createUser(userDTO);
 
         logger.info("Created user: {}", createdUser.toString());
         return createdUser;

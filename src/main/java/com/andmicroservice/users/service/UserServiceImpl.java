@@ -1,6 +1,9 @@
 package com.andmicroservice.users.service;
 
 import com.andmicroservice.users.domain.User;
+import com.andmicroservice.users.exception.EmailExistsException;
+import com.andmicroservice.users.exception.IdProvidedException;
+import com.andmicroservice.users.exception.LoginExistsException;
 import com.andmicroservice.users.repository.UserRepository;
 import com.andmicroservice.users.representation.UserDTO;
 import com.andmicroservice.users.representation.mapper.UserMapper;
@@ -33,13 +36,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO createUser(UserDTO userDTO) {
+    public UserDTO createUser(UserDTO userDTO) throws EmailExistsException, LoginExistsException, IdProvidedException {
         logger.info("Creating user: {}", userDTO);
 
-        if (userRepository.findOneByLogin(userDTO.getLogin()).isPresent()) {
-            throw new IllegalArgumentException("Login already in use");
+        if(userDTO.getId() != null) {
+            throw new IdProvidedException();
+        } else if (userRepository.findOneByLogin(userDTO.getLogin()).isPresent()) {
+            throw new EmailExistsException();
         } else if (userRepository.findOneByEmail(userDTO.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already in use");
+            throw new LoginExistsException();
         }
 
         User user = new User();
