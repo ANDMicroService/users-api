@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.Instant;
 
 public class User {
 
@@ -37,6 +38,28 @@ public class User {
     @Size(min = 5, max = 100)
     @Indexed
     private String email;
+
+    private boolean activated = false;
+
+    @Size(min = 2, max = 5)
+    @Field("lang_key")
+    private String langKey;
+
+    @Size(max = 256)
+    @Field("image_url")
+    private String imageUrl;
+
+    @Size(max = 20)
+    @Field("activation_key")
+    private String activationKey;
+
+    @Size(max = 20)
+    @Field("reset_key")
+    private String resetKey;
+
+    @Field("reset_date")
+    private Instant resetDate = null;
+
 
     public String getId() {
         return id;
@@ -84,5 +107,91 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public boolean isActivated() {
+        return activated;
+    }
+
+    public void setActivated(boolean activated) {
+        this.activated = activated;
+    }
+
+    public String getLangKey() {
+        return langKey;
+    }
+
+    public void setLangKey(String langKey) {
+        this.langKey = langKey;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getActivationKey() {
+        return activationKey;
+    }
+
+    public void setActivationKey(String activationKey) {
+        this.activationKey = activationKey;
+    }
+
+    public String getResetKey() {
+        return resetKey;
+    }
+
+    public void setResetKey(String resetKey) {
+        this.resetKey = resetKey;
+    }
+
+    public Instant getResetDate() {
+        return resetDate;
+    }
+
+    public void setResetDate(Instant resetDate) {
+        this.resetDate = resetDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        User user = (User) o;
+
+        return login.equals(user.login);
+    }
+
+    @Override
+    public int hashCode() {
+        return login.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id='" + id + '\'' +
+                ", login='" + login + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", activated=" + activated +
+                ", langKey='" + langKey + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", resetDate=" + resetDate +
+                '}';
     }
 }
