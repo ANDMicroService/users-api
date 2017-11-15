@@ -43,6 +43,12 @@ public class UserBuilder {
     }
 
     public UserDTO build() {
+        if(id == null || id.isEmpty()) {
+            throw new IllegalArgumentException("User ID missing");
+        }
+        if(login == null || login.isEmpty()) {
+            throw new IllegalArgumentException("User login missing");
+        }
         return new UserDTO(id, login, firstName, lastName, email);
     }
 }

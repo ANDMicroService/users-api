@@ -10,6 +10,9 @@ public class UserMapperImpl implements UserMapper {
 
     @Override
     public UserDTO map(com.andmicroservice.users.domain.User user) {
+        if(user == null) {
+            return null;
+        }
         return UserBuilder.aUser()
                 .withId(user.getId())
                 .withLogin(user.getLogin())

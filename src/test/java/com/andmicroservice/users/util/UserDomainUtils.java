@@ -9,6 +9,16 @@ import static com.andmicroservice.users.util.TestConstants.USER_EMAIL;
 
 public class UserDomainUtils {
 
+    public static UserDomainBuilder aTestUserBuilder() {
+        return UserDomainBuilder.aUser()
+                .withId(USER_ID)
+                .withPassword(USER_PASSWORD)
+                .withLogin(USER_LOGIN)
+                .withFirstName(USER_FIRSTNAME)
+                .withLastName(USER_LASTNAME)
+                .withEmail(USER_EMAIL);
+    }
+
     public static User aTestUser() {
         return UserDomainBuilder.aUser()
                 .withId(USER_ID)

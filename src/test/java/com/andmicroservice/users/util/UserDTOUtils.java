@@ -1,15 +1,24 @@
 package com.andmicroservice.users.util;
 
+import com.andmicroservice.users.builder.UserDTOTestBuilder;
 import com.andmicroservice.users.representation.UserDTO;
-import com.andmicroservice.users.representation.builder.UserBuilder;
 
-import static com.andmicroservice.users.util.TestConstants.*;
+import static com.andmicroservice.users.util.TestConstants.USER_EMAIL;
+import static com.andmicroservice.users.util.TestConstants.USER_EMAIL2;
+import static com.andmicroservice.users.util.TestConstants.USER_FIRSTNAME;
+import static com.andmicroservice.users.util.TestConstants.USER_FIRSTNAME2;
+import static com.andmicroservice.users.util.TestConstants.USER_ID;
+import static com.andmicroservice.users.util.TestConstants.USER_ID2;
+import static com.andmicroservice.users.util.TestConstants.USER_LASTNAME;
+import static com.andmicroservice.users.util.TestConstants.USER_LASTNAME2;
+import static com.andmicroservice.users.util.TestConstants.USER_LOGIN;
+import static com.andmicroservice.users.util.TestConstants.USER_LOGIN2;
 
 public class UserDTOUtils {
 
 
-    public static UserBuilder aTestUserBuilder() {
-        return UserBuilder.aUser()
+    public static UserDTOTestBuilder aTestUserBuilder() {
+        return UserDTOTestBuilder.aUser()
                 .withId(USER_ID)
                 .withLogin(USER_LOGIN)
                 .withFirstName(USER_FIRSTNAME)
@@ -18,7 +27,7 @@ public class UserDTOUtils {
     }
 
     public static UserDTO aTestUser() {
-        return UserBuilder.aUser()
+        return UserDTOTestBuilder.aUser()
                 .withId(USER_ID)
                 .withLogin(USER_LOGIN)
                 .withFirstName(USER_FIRSTNAME)
@@ -28,7 +37,7 @@ public class UserDTOUtils {
     }
 
     public static UserDTO aSecondTestUser() {
-        return UserBuilder.aUser()
+        return UserDTOTestBuilder.aUser()
                 .withId(USER_ID2)
                 .withLogin(USER_LOGIN2)
                 .withFirstName(USER_FIRSTNAME2)
