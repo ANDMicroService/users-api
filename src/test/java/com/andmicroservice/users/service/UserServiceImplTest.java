@@ -1,6 +1,9 @@
 package com.andmicroservice.users.service;
 
 import com.andmicroservice.users.domain.User;
+import com.andmicroservice.users.exception.EmailExistsException;
+import com.andmicroservice.users.exception.IdProvidedException;
+import com.andmicroservice.users.exception.LoginExistsException;
 import com.andmicroservice.users.repository.UserRepository;
 import com.andmicroservice.users.representation.UserDTO;
 import com.andmicroservice.users.representation.mapper.UserMapper;
@@ -8,9 +11,10 @@ import com.andmicroservice.users.util.UserDTOUtils;
 import com.andmicroservice.users.util.UserDomainUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Arrays;
@@ -22,10 +26,15 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 
@@ -41,6 +50,9 @@ public class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
 
+    @Captor
+    private ArgumentCaptor<User> userCaptor;
+
     @Test
     public void getAllUsers_whenNoUsers_returnsEmptyList() {
         assertThat(userService.getAllUsers(), is(empty()));
@@ -48,16 +60,16 @@ public class UserServiceImplTest {
 
     @Test
     public void getAllUsers_whenSingleUser_returnsListWithUserRepresentation() {
-        User domainUser = UserDomainUtils.aTestUser();
+        User savedUser = UserDomainUtils.aTestUser();
         UserDTO expectedUserDTO = UserDTOUtils.aTestUser();
-        when(userRepository.findAll()).thenReturn(Collections.singletonList(domainUser));
-        when(userMapper.map(any(com.andmicroservice.users.domain.User.class))).thenReturn(expectedUserDTO);
+        when(userRepository.findAll()).thenReturn(Collections.singletonList(savedUser));
+        when(userMapper.map(any(User.class))).thenReturn(expectedUserDTO);
 
         List<UserDTO> result = userService.getAllUsers();
 
-        assertThat(result, equalTo(Collections.singletonList(expectedUserDTO)));
         verify(userRepository).findAll();
-        verify(userMapper).map(eq(domainUser));
+        verify(userMapper).map(eq(savedUser));
+        assertThat(result, equalTo(Collections.singletonList(expectedUserDTO)));
     }
 
     @Test
@@ -99,9 +111,101 @@ public class UserServiceImplTest {
 
         userService.deleteUser(login1);
         verify(userRepository).findOneByLogin(login1);
-        verify(userRepository, Mockito.times(0)).delete(login1);
+        verify(userRepository, times(0)).delete(login1);
+    }
 
 
+    @Test
+    public void createUser_whenUserIdProvided_throwIdProvidedException() {
+        UserDTO userDTO = UserDTOUtils.aTestUser();
+
+        try {
+            userService.createUser(userDTO);
+            fail("Should throw IdProvidedException");
+        } catch (EmailExistsException e) {
+            fail("Should throw IdProvidedException, but threw EmailExistsException");
+        } catch (LoginExistsException e) {
+            fail("Should throw IdProvidedException, but threw LoginExistsException");
+        } catch (IdProvidedException e) {
+        } finally {
+            verifyNoMoreInteractions(userRepository);
+        }
+    }
+
+    @Test
+    public void createUser_whenUserLoginExists_throwLoginExistsException() {
+        UserDTO userDTO = UserDTOUtils.aTestUserBuilder()
+                .withId(null)
+                .build();
+        when(userRepository.findOneByLogin(anyString())).thenReturn(Optional.of(UserDomainUtils.aTestUser()));
+
+        try {
+            userService.createUser(userDTO);
+            fail("Should throw LoginExistsException");
+        } catch (EmailExistsException e) {
+            fail("Should throw LoginExistsException, but threw EmailExistsException");
+        } catch (LoginExistsException e) {
+        } catch (IdProvidedException e) {
+            fail("Should throw LoginExistsException, but threw IdProvidedException");
+        } finally {
+            verify(userRepository).findOneByLogin(eq(userDTO.getLogin()));
+            verifyNoMoreInteractions(userRepository);
+        }
+    }
+
+    @Test
+    public void createUser_whenUserEmailsExists_throwEmailExistsException() {
+        UserDTO userDTO = UserDTOUtils.aTestUserBuilder()
+                .withId(null)
+                .build();
+        when(userRepository.findOneByLogin(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findOneByEmail(anyString())).thenReturn(Optional.of(UserDomainUtils.aTestUser()));
+
+        try {
+            userService.createUser(userDTO);
+            fail("Should throw EmailExistsException");
+        } catch (EmailExistsException e) {
+        } catch (LoginExistsException e) {
+            fail("Should throw EmailExistsException, but threw LoginExistsException");
+        } catch (IdProvidedException e) {
+            fail("Should throw EmailExistsException, but threw IdProvidedException");
+        } finally {
+            verify(userRepository).findOneByLogin(eq(userDTO.getLogin()));
+            verify(userRepository).findOneByEmail(eq(userDTO.getEmail()));
+            verifyNoMoreInteractions(userRepository);
+        }
+    }
+
+    @Test
+    public void createUser_whenUserIsValid_thenSaveUserAndReturnUserDTO() {
+        UserDTO userDTO = UserDTOUtils.aTestUserBuilder()
+                .withId(null)
+                .build();
+        UserDTO expectedUserDTO = UserDTOUtils.aTestUser();
+        when(userRepository.findOneByLogin(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findOneByEmail(anyString())).thenReturn(Optional.empty());
+        when(userMapper.map(any(User.class))).thenReturn(expectedUserDTO);
+
+        UserDTO userResult = null;
+        try {
+            userResult = userService.createUser(userDTO);
+        } catch (EmailExistsException | LoginExistsException | IdProvidedException e) {
+            fail("Should not throw exceptions");
+        }
+
+        verify(userRepository).findOneByLogin(eq(userDTO.getLogin()));
+        verify(userRepository).findOneByEmail(eq(userDTO.getEmail()));
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+        assertThat(savedUser.getId(), isEmptyOrNullString());
+        assertThat(savedUser.getLogin(), is(userDTO.getLogin()));
+        assertThat(savedUser.getPassword(), is(userDTO.getPassword()));
+        assertThat(savedUser.getEmail(), is(userDTO.getEmail()));
+        assertThat(savedUser.getFirstName(), is(userDTO.getFirstName()));
+        assertThat(savedUser.getLastName(), is(userDTO.getLastName()));
+        verify(userMapper).map(eq(savedUser));
+        assertThat(userResult, is(expectedUserDTO));
+        verifyNoMoreInteractions(userRepository);
     }
 
 }
