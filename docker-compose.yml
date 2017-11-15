@@ -2,15 +2,13 @@ version: '3.3'
 
 services:
   db:
-    container_name: skeleton-db
-    image: mysql
+    container_name: users-db
+    image: mongo
     ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
+      - "27017:27017"
 
   api:
-    container_name: skeleton-api
+    container_name: users-api
     build: .
     ports:
       - "8080:8080"
@@ -19,5 +17,7 @@ services:
     depends_on:
       - db
     environment:
-      - MYSQL_URI=mysql://db:3306
+      - MONGO_HOST=db
+      - MONGO_PORT=27017
+      - MONGO_DB=users_db
 
